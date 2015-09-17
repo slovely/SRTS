@@ -13,6 +13,12 @@ You might want to write your SignalR client code in TypeScript instead of JavaSc
 * Dev/build time type checking. This is especially helpful when the churn in your code is high
 * Better tooling support. While intellisense for JavaScript is getting better, it's not on par with TypeScript
 
+## FORKED (by slovely)
+
+This fork modifies SRTS in the following way:
+* More return/parameter types are supported - included generics.
+* No longer generates definitions for return/parameter types.  The assumption is that these will be produced by another tool (for example: https://bitbucket.org/LukasKabrt/typelite/)
+
 ## HOW
 
 ### Using NuGet
