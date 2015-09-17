@@ -16,6 +16,7 @@ You might want to write your SignalR client code in TypeScript instead of JavaSc
 ## FORKED (by slovely)
 
 This fork modifies SRTS in the following way:
+* Supports strongly-typed hubs (i.e. hubs that derive from Hub<T>)
 * More return/parameter types are supported - included generics.
 * No longer generates definitions for return/parameter types.  The assumption is that these will be produced by another tool (for example: https://bitbucket.org/LukasKabrt/typelite/)
 
