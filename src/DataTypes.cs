@@ -170,7 +170,7 @@ namespace SRTS
         static TypeScriptType MakeClassOrInterface(Type type)
         {
             var declaration = "";
-            var name = type.Name;
+            var name = type.FullName;
 
             var members = type.GetMembers().ToList()
                 .Select((mi, x) => Tuple.Create(mi.MemberType.ToString(), mi))
@@ -178,35 +178,35 @@ namespace SRTS
                 .ToList();
 
             // TODO: Consider differentiating between classes and interfaces...
-            declaration += "interface " + name + " {\n";
+            //declaration += "interface " + name + " {\n";
 
-            members.ForEach(mt =>
-            {
-                var mem = mt.Item2;
+            //members.ForEach(mt =>
+            //{
+            //    var mem = mt.Item2;
 
-                var fieldName = mem.Name;
-                var typeName = "";
+            //    var fieldName = mem.Name;
+            //    var typeName = "";
 
-                if (mt.Item1 == "Property")
-                {
-                    var prop = type.GetProperty(fieldName);
-                    typeName = GetTypeScriptType(prop.PropertyType).Name;
-                }
-                else if (mt.Item1 == "Field")
-                {
-                    var prop = type.GetField(fieldName);
-                    typeName = GetTypeScriptType(prop.FieldType).Name;
-                }
-                else
-                {
-                    // Shouldn't happen
-                    throw new ArgumentException("Unknown kind of class or interface element: " + fieldName + " is not expected....");
-                }
+            //    if (mt.Item1 == "Property")
+            //    {
+            //        var prop = type.GetProperty(fieldName);
+            //        typeName = GetTypeScriptType(prop.PropertyType).Name;
+            //    }
+            //    else if (mt.Item1 == "Field")
+            //    {
+            //        var prop = type.GetField(fieldName);
+            //        typeName = GetTypeScriptType(prop.FieldType).Name;
+            //    }
+            //    else
+            //    {
+            //        // Shouldn't happen
+            //        throw new ArgumentException("Unknown kind of class or interface element: " + fieldName + " is not expected....");
+            //    }
 
-                declaration += "    " + mem.Name + ": " + typeName + ";\n";
-            });
+            //    declaration += "    " + mem.Name + ": " + typeName + ";\n";
+            //});
 
-            declaration += "}";
+            //declaration += "}";
 
             return new TypeScriptType
             {

@@ -7,6 +7,8 @@ namespace SRTS
     {
         public static string Create(Assembly assembly)
         {
+            //System.Diagnostics.Debugger.Launch();
+            //System.Diagnostics.Debugger.Break();
             ServiceTypes.AddHubsFromAssembly(assembly);
 
             var dec = "";
@@ -84,6 +86,16 @@ namespace SRTS
                 dec += "}\n";
 
             }
+
+            dec += "\n\n// connection interface\n";
+            dec += "interface SignalR {\n";
+            foreach (var k in ServiceTypes.HubCache.Keys)
+            {
+                var dt = ServiceTypes.HubCache[k];
+                var name = ServiceTypes.CamelCase(dt.Name.Substring(1));
+                dec += "    " + name + ": " + dt.Name + "Proxy;\n";
+            }
+            dec += "}\n";
             return dec;
         }
     }

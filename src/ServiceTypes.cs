@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 
 namespace SRTS
 {
@@ -23,7 +23,7 @@ namespace SRTS
             hubAliasesCache = new Dictionary<string, string>();
         }
 
-        static string CamelCase(string s)
+        public static string CamelCase(string s)
         {
             return s[0].ToString().ToLower() + s.Substring(1);
         }
@@ -34,28 +34,12 @@ namespace SRTS
             var cName = name + "Client";
 
             var declaration = "interface " + name + " {\n";
-            var count = 0;
-            var sep = "";
             var hubAttribute = "";
             hubType.GetMethods()
-                .Where(mi => mi.DeclaringType.Name == hubType.Name).ToList()
+                .Where(mi => mi.GetBaseDefinition().DeclaringType.Name == hubType.Name).ToList()
                 .ForEach(mi =>
                 {                    
-                    declaration += "    " + CamelCase(mi.Name) + "(";
-
-                    var retTS = DataTypes.GetTypeScriptType(mi.ReturnType);
-                    var retType = retTS.Name == "System.Void" ? "void" : "IPromise<" + retTS.Name + ">";
-                    mi.GetParameters().ToList()
-                    .ForEach((pi) =>
-                    {
-                        sep = (count != 0 ? ", " : "");
-                        count++;
-                        var tst = DataTypes.GetTypeScriptType(pi.ParameterType);
-                        declaration += sep + pi.Name  + ": " + tst.Name;
-                    });
-
-                    declaration += "): "+ retType + ";\n";
-                    count = 0;
+                    declaration += GetMethodDeclaration(mi);
                 });
             
             declaration += "}";
@@ -77,10 +61,48 @@ namespace SRTS
 
             clientCache.Add(cName, new TypeScriptType { 
                 Name = cName,
-                Declaration = "interface " + cName + " {  \n    /* Not implemented */ \n}"
+                Declaration = GetClientDeclaration(hubType, cName)
             });
 
             return ret;
+        }
+
+        private static string GetClientDeclaration(Type hubType, string cName)
+        {
+            if (hubType.BaseType.Name == "Hub")
+            {
+                return "interface " + cName + " {  \n    /* Not implemented */ \n}";
+            }
+            var clientInterface = hubType.BaseType.GenericTypeArguments[0];
+            var result = "interface " + cName + " {  \n    /* implements " + clientInterface.Name + " */\n";
+            clientInterface.GetMethods()
+                .Where(mi => mi.DeclaringType.Name == clientInterface.Name).ToList()
+                .ForEach(mi =>
+                {
+                    result += GetMethodDeclaration(mi);
+                });
+            result += "}";
+            return result;
+        }
+
+        private static string GetMethodDeclaration(MethodInfo mi)
+        {
+            var count = 0;
+            var result = "    " + CamelCase(mi.Name) + "(";
+
+            var retTS = DataTypes.GetTypeScriptType(mi.ReturnType);
+            var retType = retTS.Name == "void" ? "void" : "IPromise<" + retTS.Name + ">";
+            mi.GetParameters().ToList()
+                .ForEach((pi) =>
+                {
+                    var sep = (count != 0 ? ", " : "");
+                    count++;
+                    var tst = DataTypes.GetTypeScriptType(pi.ParameterType);
+                    result += sep + pi.Name + ": " + tst.Name;
+                });
+
+            result += "): " + retType + ";\n";
+            return result;
         }
 
         /*
@@ -94,6 +116,10 @@ namespace SRTS
             assembly.GetTypes()
 	            .Where(t => t.BaseType != null && t.BaseType.Name == "Hub").ToList()
                 .ForEach(t => MakeHubInterface(t) );
+
+            assembly.GetTypes()
+                .Where(t => t.BaseType != null && t.BaseType.Name == "Hub`1").ToList()
+                .ForEach(t => MakeHubInterface(t));
         }
     }
 }
