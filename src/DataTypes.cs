@@ -172,6 +172,18 @@ namespace SRTS
             var declaration = "";
             var name = type.FullName;
 
+            if (type.IsGenericType)
+            {
+                name = type.FullName.Remove(type.FullName.IndexOf('`')) + "<";
+                var count = 0;
+                foreach (var genericArgument in type.GetGenericArguments())
+                {
+                    if (count++ != 0) name += ", ";
+                    name += GetTypeScriptType(genericArgument).Name;
+                }
+                name += ">";
+            }
+
             var members = type.GetMembers().ToList()
                 .Select((mi, x) => Tuple.Create(mi.MemberType.ToString(), mi))
                 .Where(mt => (mt.Item1 == "Property" || mt.Item1 == "Field"))

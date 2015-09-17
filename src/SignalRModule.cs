@@ -7,8 +7,6 @@ namespace SRTS
     {
         public static string Create(Assembly assembly)
         {
-            //System.Diagnostics.Debugger.Launch();
-            //System.Diagnostics.Debugger.Break();
             ServiceTypes.AddHubsFromAssembly(assembly);
 
             var dec = "";
