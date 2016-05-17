@@ -244,7 +244,7 @@ namespace SRTS
                 value = MakeFromNullable(type);
             }
             // Tasks..
-            else if (type.FullName.Contains("Task") || type.GetInterfaces().Any(X => X.FullName.Contains("Task")))
+            else if (type.FullName.Contains("System.Threading.Tasks.Task") || type.GetInterfaces().Any(X => X.FullName.Contains("System.Threading.Tasks.Task")))
             {
                 value = MakeFromTask(type);
             }
